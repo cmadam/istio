@@ -27,7 +27,6 @@ import (
 	"istio.io/istio/pkg/test/framework"
 	"istio.io/istio/pkg/test/framework/components/echo"
 	"istio.io/istio/pkg/test/util/tmpl"
-	"istio.io/istio/tests/integration/security/util"
 	"istio.io/istio/tests/integration/security/util/cert"
 )
 
@@ -64,22 +63,19 @@ func TestStrictMTLS(t *testing.T) {
 		Run(func(t framework.TestContext) {
 			peerTemplate := tmpl.EvaluateOrFail(t, PeerAuthenticationConfig, map[string]string{"AppNamespace": apps.Namespace.Name()})
 			t.ConfigIstio().ApplyYAMLOrFail(t, apps.Namespace.Name(), peerTemplate)
-			util.WaitForConfig(t, apps.Namespace, peerTemplate)
+			t.ConfigIstio().WaitForConfigOrFail(t, t, apps.Namespace.Name(), peerTemplate)
 
 			drTemplate := tmpl.EvaluateOrFail(t, DestinationRuleConfigIstioMutual, map[string]string{"AppNamespace": apps.Namespace.Name()})
 			t.ConfigIstio().ApplyYAMLOrFail(t, apps.Namespace.Name(), drTemplate)
-			util.WaitForConfig(t, apps.Namespace, drTemplate)
+			t.ConfigIstio().WaitForConfigOrFail(t, t, apps.Namespace.Name(), drTemplate)
 
-			response := apps.Client.CallOrFail(t, echo.CallOptions{
-				Target:   apps.Server,
-				PortName: "http",
-				Scheme:   scheme.HTTP,
-				Count:    1,
+			apps.Client.CallWithRetryOrFail(t, echo.CallOptions{
+				Target:    apps.Server,
+				PortName:  "http",
+				Scheme:    scheme.HTTP,
+				Count:     1,
+				Validator: echo.ExpectOK(),
 			})
-
-			if err := response.CheckOK(); err != nil {
-				t.Fatalf("client could not reach server: %v", err)
-			}
 
 			certPEMs := cert.DumpCertFromSidecar(t, apps.Client, apps.Server, "http")
 			block, _ := pem.Decode([]byte(strings.Join(certPEMs, "\n")))

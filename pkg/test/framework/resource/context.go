@@ -38,6 +38,12 @@ type ConfigManager interface {
 	// DeleteYAMLOrFail deletes the given config yaml text.
 	DeleteYAMLOrFail(t test.Failer, ns string, yamlText ...string)
 
+	// WaitForConfig waits for the given config yaml to be applied.
+	WaitForConfig(ctx Context, ns string, yamlText ...string) error
+
+	// WaitForConfigOrFail calls WaitForConfig and fails if an error is encountered.
+	WaitForConfigOrFail(ctx Context, t test.Failer, ns string, yamlText ...string)
+
 	// WithFilePrefix sets the prefix used for intermediate files.
 	WithFilePrefix(prefix string) ConfigManager
 }
@@ -69,7 +75,7 @@ type Context interface {
 	// Settings returns common settings
 	Settings() *Settings
 
-	// WhenDone runs the given function when the test context completes.
+	// ConditionalCleanup runs the given function when the test context completes.
 	// If -istio.test.nocleanup is set, this function will not be executed. To unconditionally cleanup, use Cleanup.
 	// This function may not (safely) access the test context.
 	ConditionalCleanup(fn func())

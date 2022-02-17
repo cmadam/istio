@@ -109,7 +109,7 @@ require (
 	bitbucket.org/creachadair/shell v0.0.6 // indirect
 	cloud.google.com/go/iam v0.1.1 // indirect
 	cloud.google.com/go/kms v0.1.0 // indirect
-	cloud.google.com/go/storage v1.16.1 // indirect
+	cloud.google.com/go/storage v1.20.0 // indirect
 	github.com/Azure/azure-sdk-for-go v56.3.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.8 // indirect
 	github.com/Azure/go-autorest/autorest/azure/cli v0.4.2 // indirect
